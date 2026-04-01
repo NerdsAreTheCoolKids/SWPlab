@@ -80,7 +80,25 @@ void copy(char* s, int n, char* t) {
 
 // Baue neuen String welcher eine Kopie des Eingabestrings ist.
 char* copyStr(char* s) {
-	// TODO
+	int neededSpace = 0;
+	char* temp = s;
+	while(*temp != '\0'){
+	    neededSpace++;
+	    temp++;
+	}
+	
+	char* beginOfString = (char*)malloc(neededSpace + 1);
+	char* endOfString = beginOfString;
+	char* tempI = beginOfString;
+	for(int i = 0; i < neededSpace; i++){
+	 endOfString++;   
+	}
+	    
+	copy(s, neededSpace, beginOfString);
+	
+	*endOfString = '\0';
+	
+	return beginOfString;
 }
 
 // Baue neuen String welcher mit Zeichen c startet gefolgt von allen Zeichen in s.
