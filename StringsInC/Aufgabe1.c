@@ -38,26 +38,32 @@ int length(char *s) {
 // Annahme: C String besteht nur aus Klein-/Grossbuchstaben und Leerzeichen.
 char* normalisiere(char* s) {
 	int neededSpace = 0;
-	while (*s != '\0') {
-		s++;
-		if(*s == ' ') {
+	char* temp = s;
+	while (*temp != '\0') {
+		if(*temp == ' ') {
+			temp++;
 			continue;
 		}
 		neededSpace++;
+		temp++;
 	}
-	char* result = (char*)malloc(neededSpace + 1);
+	char* beginOfString = (char*)malloc(neededSpace + 1);
+	char* result = beginOfString;
 	while (*s != '\0') {
 		if(*s == ' ') {
+			s++;
 			continue;
 		}
 		if (*s >= 'A' && *s <= 'Z') {
 			*s = *s + 32;
 		}
-		*result = *result + *s;
+		
+		*result = *s;
+		result++;
 		s++;
 	}
-	result = result + '\0';
-    return result;
+	*result = '\0';
+	return beginOfString;
 }
 
 
