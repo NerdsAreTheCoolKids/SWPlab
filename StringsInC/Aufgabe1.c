@@ -171,7 +171,7 @@ char* replace(char* s, struct OldNew* m, int n) {
 	for(int i = 0; i < n; i++){
 	    temp = copiedS;
 	    while(*temp != '\0'){
-	        if(*temp == m->old){
+	        if(*temp == m->old ){
 	            *temp = m->new;
 	        }
 	        temp++;
@@ -367,19 +367,68 @@ void runTests(TC* tc, int n, char* sut(char*)) {
 
 }
 
+char* testPutBackExclam(char* s) {
+    return putBack('!', s);
+}
+
+char* testReplaceExample(char* s) {
+    struct OldNew m[] = { {'B', 'b'}, {'s', '!'} };
+    return replace(s, m, 2);
+}
+
 
 void unitTests() {
-	printf("\n\n *** Unit Tests *** \n\n");
+    printf("\n\n *** Unit Tests *** \n\n");
 
-	TC normTests[] = {
-		{"hElLo", "hello"},
-		{"hEl Lo", "hello"},
-		{"h  El Lo", "hello"},
-	};
+    // --- Tests für normalisiere ---
+    printf("\n[Testing: normalisiere]");
+    TC normTests[] = {
+        {"hElLo", "hello"},
+        {"hEl Lo", "hello"},
+        {"h  El Lo", "hello"},
+        {"  A  B  ", "ab"},
+        {"", ""} // Edge Case: Leerer String
+    };
+    runTests(normTests, 5, normalisiere);
 
+    // --- Tests für copyStr ---
+    printf("\n\n[Testing: copyStr]");
+    TC copyTests[] = {
+        {"Test", "Test"},
+        {"Hallo Welt", "Hallo Welt"},
+        {"", ""}
+    };
+    runTests(copyTests, 3, copyStr);
 
-	runTests(normTests, 3, normalisiere);
+    // --- Tests für rev (Rekursiv) ---
+    printf("\n\n[Testing: rev]");
+    TC revTests[] = {
+        {"abcd", "dcba"},
+        {"hello", "olleh"},
+        {"!aB", "Ba!"},
+        {"", ""}
+    };
+    runTests(revTests, 4, rev);
 
+    // --- Tests für putBack (via Wrapper) ---
+    printf("\n\n[Testing: putBack (mit '!')]");
+    TC pbTests[] = {
+        {"abcd", "abcd!"},
+        {"Hi", "Hi!"},
+        {"", "!"}
+    };
+    runTests(pbTests, 3, testPutBackExclam);
+
+    // --- Tests für replace (via Wrapper) ---
+    printf("\n\n[Testing: replace (B->b, s->!)]");
+    TC repTests[] = {
+        {"Aa dss fBB", "Aa d!! fbb"},
+        {"Boss", "bo!!"},
+        {"Nix", "Nix"}
+    };
+    runTests(repTests, 3, testReplaceExample);
+
+    printf("\n\n --- Alle Unit Tests abgeschlossen --- \n");
 }
 
 char* rndString() {
