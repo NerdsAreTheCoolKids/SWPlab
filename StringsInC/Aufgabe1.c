@@ -54,11 +54,11 @@ char* normalisiere(char* s) {
 			s++;
 			continue;
 		}
-		if (*s >= 'A' && *s <= 'Z') {
-			*s = *s + 32;
-		}
-		
-		*result = *s;
+		char c = *s;
+        if (c >= 'A' && c <= 'Z') {
+            c = c + 32;
+        }
+        *result = c;
 		result++;
 		s++;
 	}
@@ -127,13 +127,33 @@ char* reverse(char* s) {
 
 // Baue neuen String welcher aus allen Zeichen in s besteht gefolgt von Zeichen c.
 char* putBack(char c, char* s) {
-	// TODO
+    char* temp = s;
+    int neededSpace = 0;
+    while(*temp != '\0'){
+        neededSpace++;
+        temp++;
+    }
+    
+    char* result = (char*) malloc(neededSpace +1);
+    
+	char* reversedS = reverse(s);
+	char* modifiedS = putFront(c, reversedS);
+	result = reverse(modifiedS);
+	
+	return result;
 }
 
 // Baue einen neuen String welcher die Umkehrung des Eingabestrings ist.
 // Hinweis: Die Implementierung soll rekursiv sein und die Hilfsroutine putBack verwenden.
 char* rev(char* s) {
-	// TODO
+	if(*s == '\0'){
+	    char* empty = (char*) malloc(1);
+        *empty = '\0';
+        return empty;
+	}
+	char* reversedRest = rev(s + 1);
+	char* result = putBack(*s, reversedRest);
+    return result;
 }
 
 
@@ -146,7 +166,19 @@ struct OldNew {
 // Ersetze in einem String jedes Zeichen 'old' mit dem Zeichen 'new'.
 // Die Zeichen 'old' und 'new' sind definiert in einem Array vom Typ struct OldNew.
 char* replace(char* s, struct OldNew* m, int n) {
-	// TODO
+	char* copiedS = copyStr(s);
+	char* temp;
+	for(int i = 0; i < n; i++){
+	    temp = copiedS;
+	    while(*temp != '\0'){
+	        if(*temp == m->old){
+	            *temp = m->new;
+	        }
+	        temp++;
+	    }
+	    m++;
+	}
+	return copiedS;
 }
 
 enum Bool {
@@ -198,6 +230,7 @@ void userTests() {
 
 	printf("\n3. %s", s3);
 
+
 	char s4[] = "abcd";
 
 	char* s5 = putBack('!',s4);
@@ -244,6 +277,72 @@ void userTests() {
 	free(s10);
 	free(s11);
 	free(s13);
+	
+	printf("\n========================================");
+    printf("\n          START DER UNIT TESTS          ");
+    printf("\n========================================\n");
+
+    // --- TEST 1: normalisiere ---
+    printf("\n[TEST 1] normalisiere:");
+    char n1[] = "  A b C  d ";
+    char* res1 = normalisiere(n1);
+    printf("\n  Input:  \"%s\"", n1);
+    printf("\n  Output: \"%s\" (Erwartet: \"abcd\")", res1);
+    free(res1);
+
+    // --- TEST 2: copyStr ---
+    printf("\n\n[TEST 2] copyStr:");
+    char* original = "Test-String";
+    char* kopie = copyStr(original);
+    printf("\n  Original: %s (Adresse: %p)", original, (void*)original);
+    printf("\n  Kopie:    %s (Adresse: %p)", kopie, (void*)kopie);
+    if (original != kopie) printf("\n  Status:   Erfolgreich (neue Speicheradresse)");
+    free(kopie);
+
+    // --- TEST 3: putBack ---
+    printf("\n\n[TEST 3] putBack:");
+    char* base = "Hello";
+    char* appended = putBack('!', base);
+    printf("\n  Input:  \"%s\" + '!'", base);
+    printf("\n  Output: \"%s\" (Erwartet: \"Hello!\")", appended);
+    free(appended);
+
+    // --- TEST 4: rev (Rekursiv) ---
+    printf("\n\n[TEST 4] rev (Rekursion):");
+    char* r_input = "Recursion";
+    char* r_res = rev(r_input);
+    printf("\n  Input:  \"%s\"", r_input);
+    printf("\n  Output: \"%s\" (Erwartet: \"noisruceR\")", r_res);
+    
+    // Test mit leerem String (Grenzfall für Rekursion)
+    char* r_empty = rev("");
+    printf("\n  Leerer String Test: \"%s\" (Länge: 0?)", r_empty);
+    free(r_res);
+    free(r_empty);
+
+    // --- TEST 5: replace ---
+    printf("\n\n[TEST 5] replace:");
+    char s_replace[] = "Das ist ein Test";
+    struct OldNew rules[] = { {'a', '@'}, {'e', '3'}, {'i', '1'}, {'s', '5'} };
+    char* replaced = replace(s_replace, rules, 4);
+    printf("\n  Input:  \"%s\"", s_replace);
+    printf("\n  Output: \"%s\" (Erwartet: \"D@5 15t 31n T35t\")", replaced);
+    free(replaced);
+
+    // --- TEST 6: Kombination (Stress Test) ---
+    printf("\n\n[TEST 6] Kombination:");
+    // Wir normalisieren erst und drehen dann um
+    char* step1 = normalisiere("A B C"); // "abc"
+    char* step2 = rev(step1);            // "cba"
+    printf("\n  normalisiere(\"A B C\") -> rev() -> Output: \"%s\"", step2);
+   
+    free(step1);
+    free(step2);
+
+    printf("\n\n========================================");
+    printf("\n          TESTS ABGESCHLOSSEN           ");
+    printf("\n========================================\n");
+
 }
 
 struct TestCase_ {
@@ -332,5 +431,5 @@ int main() {
 
 	unitTests();
 
-	invariantenTests();
+    invariantenTests();
 }
