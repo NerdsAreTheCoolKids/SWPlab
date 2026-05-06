@@ -8,76 +8,82 @@
  *
  *	Aufgabe : Vibe Coding (mit ChatGpt Free)
  */
-.text
-.code 32
-.global main
-
-/* r0 = aktueller Zustand (seed / state) */
-/* r1 = temporär (feedback) */
-/* r2 = counter */
+        .text
+        .code 16
+        .global main
+        .thumb_func
 
 main:
-    /* Seed laden */
-    ldr r0, =918273      /* Initial seed */
 
-    mov r2, #11          /* 11 Iterationen */
+        LDR     r0, =918273
+        MOV     r1, r0
+
+        MOV     r6, #11
 
 loop:
-    bl lfsr_step         /* nächsten Zufallswert berechnen */
 
-    /* Wert auf Stack legen (FILO) */
-    push {r0}
+        MOV     r2, r1
+        MOV     r5, #1
 
-    subs r2, r2, #1
-    bne loop
+        @ --- bit0 ---
+        MOV     r3, r2
+        AND     r3, r5
 
-    b stop
+        @ --- bit8 ---
+        MOV     r4, r2
+        MOV     r7, #8
+shift8:
+        LSR     r4, r4, #1
+        SUB     r7, r7, #1
+        CMP     r7, #0
+        BNE     shift8
+        AND     r4, r5
+        EOR     r3, r4
 
+        @ --- bit22 ---
+        MOV     r4, r2
+        MOV     r7, #22
+shift22:
+        LSR     r4, r4, #1
+        SUB     r7, r7, #1
+        CMP     r7, #0
+        BNE     shift22
+        AND     r4, r5
+        EOR     r3, r4
 
-/* ---------------------------------- */
-/* LFSR Funktion */
-/* Input:  r0 = aktueller Zustand */
-/* Output: r0 = neuer Zustand */
-/* ---------------------------------- */
-lfsr_step:
-    push {r4, lr}
+        @ --- bit30 ---
+        MOV     r4, r2
+        MOV     r7, #30
+shift30:
+        LSR     r4, r4, #1
+        SUB     r7, r7, #1
+        CMP     r7, #0
+        BNE     shift30
+        AND     r4, r5
+        EOR     r3, r4
 
-    /* Bits extrahieren und XOR bilden */
+        @ --- shift state ---
+        LSR     r1, r1, #1
 
-    /* Bit 30 */
-    mov r1, r0
-    lsr r1, r1, #30
-    and r1, r1, #1
+        @ --- feedback ins MSB ---
+        MOV     r7, #31
+shiftfb:
+        LSL     r3, r3, #1
+        SUB     r7, r7, #1
+        CMP     r7, #0
+        BNE     shiftfb
 
-    /* Bit 22 */
-    mov r3, r0
-    lsr r3, r3, #22
-    and r3, r3, #1
-    eor r1, r1, r3
+        ORR     r1, r3
 
-    /* Bit 8 */
-    mov r3, r0
-    lsr r3, r3, #8
-    and r3, r3, #1
-    eor r1, r1, r3
+        MOV     r0, r1
 
-    /* Bit 0 */
-    and r3, r0, #1
-    eor r1, r1, r3
+        @ --- STACK (FILO) ---
+        PUSH    {r0}
 
-    /* Shift nach rechts */
-    lsr r0, r0, #1
-
-    /* Feedback in MSB (Bit 31) */
-    lsl r1, r1, #31
-    orr r0, r0, r1
-
-    pop {r4, lr}
-    bx lr
-
+        @ --- loop counter ---
+        SUB     r6, r6, #1
+        CMP     r6, #0
+        BNE     loop
 
 stop:
-    nop
-    bal stop
-
-.end
+        B       stop
