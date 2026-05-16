@@ -39,19 +39,19 @@ _satAdd10:
   pop {r1, r2, r3, fp, pc}
 
 _satMul10:
-  sub sp, sp, #24 // 28
+  sub sp, sp, #24 // 20
   str lr, [sp, #20] 
   str fp, [sp, #16]
   str r4, [sp, #12]
   str r3, [sp, #8]
   str r2, [sp, #4]
-  add fp, sp, #20 // 48 
+  add fp, sp, #20 // 40 
   
   mov r2, #0
   mov r3, #0
 
-  ldrh r2, [fp, #6] // lese 54
-  ldrh r3, [fp, #8] // lese 56
+  ldrh r2, [fp, #6] // lese 46
+  ldrh r3, [fp, #8] // lese 48
 
   mul r4, r2, r3
   mov r3, r4
@@ -235,50 +235,54 @@ _packMax:
   bx lr
 
 _packScale:
-  sub sp, sp, #32 // 52
-  str lr, [sp, #28]
-  str fp, [sp, #24]
-  str r7, [sp, #20]
-  str r6, [sp, #16]
-  str r5, [sp, #12]
-  str r4, [sp, #8]
-  add fp, sp, #28 // 80
+  sub sp, sp, #40 // 44
+  str lr, [sp, #36]
+  str fp, [sp, #32]
+  str r7, [sp, #28]
+  str r6, [sp, #24]
+  str r5, [sp, #20]
+  str r4, [sp, #16]
+  add fp, sp, #36 // 80
   
   ldr r1, [fp, #8]
-  str r1, [sp, #4] // 56
+  str r1, [sp, #12] // 56
   
   bl UnPack10  
 
-  mov r7, #1    // Zähler für Schleife
-  mov r2, #8    // Indexe für Register
-  mov r3, #10
+  mov r3, #10       // Faktor zum Skalieren
+  str r3, [sp, #8]
+
+  mov r4, #0
+  mov r6, #0
+  mov r7, #2    // Zähler für Schleife
+  mov r2, #16    // Indexe für Register
 
 multLoop:
-  ldrh r4, [sp, r2] // Erster Durchlauf -> erste ungepackte Zahl
+  ldrh r4, [sp, r2] 
   strh r4, [sp, #2] // Parameter setzen für satMul
-  ldrh r5, [sp, r3] // Erster Durchlauf -> zweite ungepackte Zahl
+  ldrh r5, [sp, #8] 
   strh r5, [sp, #4] // Parameter setzen für satMul
 
-  bl _satMul10
+  bl _satMul10 
 
-  ldrh r4, [sp, #0] // Ergebnis holen
-  strh r4, [sp, r2] // Ergebnis der ersten Multiplikation in den ersten Parameter reinschreiben -> Ergebnis der ersten Mult wird dann in die Schleife gegeben
+  ldrh r5, [sp, #0]
   
+  orr r6, r6, r5
 
   cmp r7, #0
   subne r7, r7, #1
-  add r3, r3, #2        // Dritte ungepackte Zahl beim zweiten Durchlauf
+  lslne r6, #10
   bne multLoop
   
-  strh r4, [fp, #12]
+  str r6, [fp, #12]
   
-  ldr r4, [sp, #8]
-  ldr r5, [sp, #12]
-  ldr r6, [sp, #16]
-  ldr r7, [sp, #20]
-  ldr fp, [sp, #24]
-  ldr lr, [sp, #28]
-  add sp, sp, #32
+  ldr r4, [sp, #16]
+  ldr r5, [sp, #20]
+  ldr r6, [sp, #24]
+  ldr r7, [sp, #28]
+  ldr fp, [sp, #32]
+  ldr lr, [sp, #36]
+  add sp, sp, #40
   bx lr
 
 _packRange:
@@ -321,8 +325,8 @@ _packRange:
 main:
     sub sp, sp, #16
     
-    ldr r3, =#0xFFFF
-    ldr r2, =#0xFFFF
+    ldr r3, =#0x3FF
+    ldr r2, =#0x3FF
     
     bl _satAdd10
   
@@ -331,9 +335,9 @@ main:
     bl _satMul10
     ldrh r1, [sp, #0]
   
-    ldr r2, =0xFF
-    ldr r3, =0xFF
-    ldr r4, =0xFF
+    ldr r2, =0x3FF
+    ldr r3, =0x3FF
+    ldr r4, =0x3FF
     mov r1, #0
     
     strh r2, [sp, #12]
@@ -352,18 +356,13 @@ main:
       
     bl UnPack10
 
-    /* Register auf 0 setzen, zum kontrollieren */
-    mov r2, #0
-    mov r3, #0
-    mov r4, #0
-
     ldrh r2, [sp, #12]
     ldrh r3, [sp, #10]
     ldrh r4, [sp, #8]
 
-    mov r2, #15
-    mov r3, #20
-    mov r4, #25
+    ldr r2, =0x3FF
+    ldr r3, =0x0
+    ldr r4, =0x3FF
 
     lsl r2, #10
     orr r2, r2, r3
@@ -378,9 +377,9 @@ main:
 
     ldrh r2, [sp, #8]
 
-    mov r2, #15
-    mov r3, #20
-    mov r4, #25
+    ldr r2, =0x3FF
+    ldr r3, =0xA
+    ldr r4, =0x3FF
 
     lsl r2, #10
     orr r2, r2, r3
@@ -395,9 +394,9 @@ main:
 
     ldrh r2, [sp, #8]
 
-    mov r2, #3
-    mov r3, #3
-    mov r4, #3
+    ldr r2, =0x3FF
+    ldr r3, =0x3AF
+    ldr r4, =0xC0C
 
     lsl r2, #10
     orr r2, r2, r3
@@ -410,12 +409,11 @@ main:
 
     bl _packScale
 
-    ldrh r2, [sp, #8]
+    ldr r2, [sp, #8]
 
-    mov r2, #15
-    mov r3, #20
-    mov r4, #25
-
+    ldr r2, =0x3FF
+    ldr r3, =0x0
+    ldr r4, =0x123
     lsl r2, #10
     orr r2, r2, r3
     lsl r2, #10
