@@ -82,13 +82,15 @@ _satMul10:
   bx  lr
 
 Pack10:
-  sub sp, sp, #16
-  str lr, [sp, #12]
-  str fp, [sp, #8]
-  str r5, [sp, #4]
-  str r4, [sp, #0]
+  sub sp, sp, #24
+  str lr, [sp, #20]
+  str fp, [sp, #16]
+  str r5, [sp, #12]
+  str r4, [sp, #8]
+  str r3, [sp, #4]
+  str r2, [sp, #0]
   
-  add fp, sp, #12
+  add fp, sp, #20
 
   ldrh r2, [fp, #16]
   ldrh r3, [fp, #14]
@@ -106,27 +108,30 @@ Pack10:
 
   sub sp, fp, #12     /* Setzen des Stack Pointers auf die erste Adresse im Stack Frame*/
     
-  ldr r4, [sp, #0]
-  ldr r4, [sp, #4]     
-  ldr fp, [sp, #8]       
-  ldr lr, [sp, #12]      
-  add sp, sp, #16 
+  ldr r2, [sp, #0]
+  ldr r3, [sp, #4]
+  ldr r4, [sp, #8]     
+  ldr fp, [sp, #12]       
+  ldr lr, [sp, #16]      
+  add sp, sp, #24
 
   bx  lr
 
 UnPack10:
-  sub sp, sp, #24
-  str lr, [sp, #20]
-  str fp, [sp, #16]
-  str r6, [sp, #12]
-  str r5, [sp, #8]
-  str r4, [sp, #4]
-  add fp, sp, #20
+  sub sp, sp, #32
+  str lr, [sp, #24]
+  str fp, [sp, #20]
+  str r6, [sp, #16]
+  str r5, [sp, #12]
+  str r4, [sp, #8]
+  str r3, [sp, #4]
+  str r2, [sp, #0]
+  add fp, sp, #28
 
   mov r2, #0
 
   ldr r2, [fp, #8]   // lesen bei 56
-  str r2, [sp, #0]    /*Zwischenspeicherung der 32-Bit Zahl*/
+  str r2, [sp, #8]    /*Zwischenspeicherung der 32-Bit Zahl*/
   ldr r6, =0x3FF      /*Maske für die ersten 10 Bits*/
 
   mov r3, #0
@@ -136,12 +141,12 @@ UnPack10:
   and r2, r2, r6
   orr r3, r3, r2
   
-  ldr r2, [sp, #0]
+  ldr r2, [sp, #8]
   lsr r2, #10
   and r2, r2, r6
   orr r4, r4, r2
 
-  ldr r2, [sp, #0]
+  ldr r2, [sp, #8]
   lsr r2, #20
   and r2, r2, r6
   orr r5, r5, r2
@@ -150,13 +155,15 @@ UnPack10:
   strh r4, [fp, #14] // 58
   strh r5, [fp, #12] // 56
 
-  sub sp, fp, #20
-  ldr r4, [sp, #4]
-  ldr r5, [sp, #8]
-  ldr r6, [sp, #12]
-  ldr fp, [sp, #16]
-  ldr lr, [sp, #20]
-  add sp, sp, #24
+  sub sp, fp, #28
+  ldr r2, [sp, #0]
+  ldr r3, [sp, #4]
+  ldr r4, [sp, #8]
+  ldr r5, [sp, #12]
+  ldr r6, [sp, #16]
+  ldr fp, [sp, #20]
+  ldr lr, [sp, #24]
+  add sp, sp, #32
 
   bx lr
 
@@ -170,8 +177,8 @@ _packMin:
   str r4, [sp, #8]
   add fp, sp, #28 //48
   
-  ldr r1, [fp, #8]
-  str r1, [sp, #4]
+  ldr r7, [fp, #8]
+  str r7, [sp, #4]
   
   bl UnPack10
 
@@ -207,8 +214,8 @@ _packMax:
   str r4, [sp, #8]
   add fp, sp, #28
   
-  ldr r1, [fp, #8]
-  str r1, [sp, #4]
+  ldr r7, [fp, #8]
+  str r7, [sp, #4]
   
   bl UnPack10
 
@@ -235,37 +242,38 @@ _packMax:
   bx lr
 
 _packScale:
-  sub sp, sp, #40 // 44
-  str lr, [sp, #36]
-  str fp, [sp, #32]
-  str r7, [sp, #28]
-  str r6, [sp, #24]
-  str r5, [sp, #20]
-  str r4, [sp, #16]
-  add fp, sp, #36 // 80
+  sub sp, sp, #48 // 44
+  str lr, [sp, #40]
+  str fp, [sp, #36]
+  str r7, [sp, #32]
+  str r6, [sp, #28]
+  str r5, [sp, #24]
+  str r4, [sp, #20]
+  str r3, [sp, #16]
+  add fp, sp, #44 // 80
   
-  ldr r1, [fp, #8]
-  str r1, [sp, #12] // 56
+  ldr r7, [fp, #8]
+  str r7, [sp, #20] // 56
   
   bl UnPack10  
 
-  mov r3, #10       // Faktor zum Skalieren
-  str r3, [sp, #8]
+  mov r7, #10       // Faktor zum Skalieren
+  str r7, [sp, #16]
 
   mov r4, #0
   mov r6, #0
   mov r7, #2    // Zähler für Schleife
-  mov r2, #16    // Indexe für Register
+  mov r3, #16    // Indexe für Register
 
 multLoop:
-  ldrh r4, [sp, r2] 
-  strh r4, [sp, #2] // Parameter setzen für satMul
-  ldrh r5, [sp, #8] 
-  strh r5, [sp, #4] // Parameter setzen für satMul
+  ldrh r4, [sp, r3] 
+  strh r4, [sp, #10] // Parameter setzen für satMul
+  ldrh r5, [sp, #16] 
+  strh r5, [sp, #12] // Parameter setzen für satMul
 
   bl _satMul10 
 
-  ldrh r5, [sp, #0]
+  ldrh r5, [sp, #8]
   
   orr r6, r6, r5
 
@@ -276,13 +284,14 @@ multLoop:
   
   str r6, [fp, #12]
   
-  ldr r4, [sp, #16]
-  ldr r5, [sp, #20]
-  ldr r6, [sp, #24]
-  ldr r7, [sp, #28]
-  ldr fp, [sp, #32]
-  ldr lr, [sp, #36]
-  add sp, sp, #40
+  ldr r3, [sp, #16]
+  ldr r4, [sp, #20]
+  ldr r5, [sp, #24]
+  ldr r6, [sp, #28]
+  ldr r7, [sp, #32]
+  ldr fp, [sp, #36]
+  ldr lr, [sp, #40]
+  add sp, sp, #48
   bx lr
 
 _packRange:
@@ -295,15 +304,15 @@ _packRange:
   str r4, [sp, #8]
   add fp, sp, #28 //80
   
-  ldr r1, [fp, #8] //88
-  str r1, [sp, #4] //56
+  ldr r7, [fp, #8] //88
+  str r7, [sp, #4] //56
   
   bl _packMin
 
   ldrh r6, [sp, #8]
 
-  ldr r1, [fp, #8]
-  str r1, [sp, #4]
+  ldr r7, [fp, #8]
+  str r7, [sp, #4]
 
   bl _packMax
 
