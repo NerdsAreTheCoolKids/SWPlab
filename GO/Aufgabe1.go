@@ -3,52 +3,49 @@ package main
 import (
 	"fmt"
 	"strings"
+	"math/rand"
 )
 
-type RomanLetter string
+type RomanLetter rune
 
 func main() {
-	var letter = []RomanLetter{"x", "l", "l", "l", "l"}
-	i, v, x, l, c, d, m := task3a(letter)
-	fmt.Print(i, v, x, l, c, d, m)
-	fmt.Println("")
 
-	var low int = 2222
-	var high int = 2222
-	var n int = 5
-	romanNumbers := task3b(low, high, n)
-	for index := 0; index < len(romanNumbers); index++ {
-		for innerIndex := 0; innerIndex < len(romanNumbers[i]); innerIndex++ {
-			fmt.Print(romanNumbers[index][innerIndex] + " ")
-		}
-		fmt.Println("")
-	}
+	//task 3a
+    var letter = []RomanLetter{'m', 'l', 'M', 'v', 'i', 'c', 'D'}
+    var i, v, x, l, c, d, m int
+	i, v, x, l, c, d, m = task3a(letter)
+    fmt.Println("I: ", i)
+	fmt.Println("V: ", v)
+	fmt.Println("X: ", x)
+	fmt.Println("L: ", l)
+	fmt.Println("C: ", c)
+	fmt.Println("D: ", d)
+	fmt.Println("M: ", m)
 
-	s := "ABC"
-	result, worked := task3c(s)
+    // task 3b
+    low := 1
+    high := 1000
+    n := 10
+    romanNumbers := task3b(low, high, n)
+    for index := 0; index < n; index++ {
+        fmt.Println(romanLettersToString(romanNumbers[index]))
+    }
 
-	if worked {
-		for index := 0; index < len(result); index++ {
-			fmt.Print(result[index])
-			fmt.Println("")
-		}
-	} else {
-		fmt.Print("False input")
-		fmt.Println("")
-	}
+    // Test 1
+    r, ok := task3c("mIxxClM")
+    fmt.Printf("Test 2: %q -> %q (ok=%v)\n", "mIxxClM", romanLettersToString(r), ok)
 
-	s2 := "mLxXcI"
-	result2, worked2 := task3c(s2)
+    // Testfall 2
+    r2, ok2 := task3c("LDCy")
+    fmt.Printf("Test 3: %q -> %q (ok=%v)\n", "LDCy", romanLettersToString(r2), ok2)
+}
 
-	if worked2 {
-		for index := 0; index < len(result2); index++ {
-			fmt.Print(result2[index])
-			fmt.Println("")
-		}
-	} else {
-		fmt.Print("False input")
-		fmt.Println("")
-	}
+func romanLettersToString(romanLetters []RomanLetter) string {
+    readable := ""
+    for i := 0; i < len(romanLetters); i++ {
+        readable += string(romanLetters[i]) + " "
+    }
+    return readable
 }
 
 // Implement a function that counts the number of occurrences of roman letters in a roman numeral.
@@ -62,19 +59,19 @@ func task3a(letter []RomanLetter) (int, int, int, int, int, int, int) {
 	m := 0
 	for index := 0; index < len(letter); index++ {
 		switch letter[index] {
-		case "I", "i":
+		case 'I', 'i':
 			i++
-		case "V", "v":
+		case 'V', 'v':
 			v++
-		case "X", "x":
+		case 'X', 'x':
 			x++
-		case "L", "l":
+		case 'L', 'l':
 			l++
-		case "C", "c":
+		case 'C', 'c':
 			c++
-		case "D", "d":
+		case 'D', 'd':
 			d++
-		case "M", "m":
+		case 'M', 'm':
 			m++
 		}
 	}
@@ -85,15 +82,10 @@ func task3a(letter []RomanLetter) (int, int, int, int, int, int, int) {
 // Generate n roman numerals where the value of each roman numeral shall be in between low and high.
 func task3b(low int, high int, n int) [][]RomanLetter {
 	var bigSlice [][]RomanLetter
-	var numberToConvert int = (high + low) / 2
 	for i := 0; i < n; i++ {
+		var numberToConvert int = rand.Intn(high-low+1) + low
 		smallSlice := convertToRomanLetter(numberToConvert)
 		bigSlice = append(bigSlice, smallSlice)
-
-		numberToConvert += i
-		if numberToConvert > high {
-			numberToConvert = low
-		}
 	}
 
 	return bigSlice
@@ -108,12 +100,8 @@ func convertToRomanLetter(diggit int) []RomanLetter {
 	for i := 0; i < len(value); i++ {
 		for diggitCopy >= value[i] {
 			romanNumber := roman[i]
-			if len(romanNumber) > 1 {
-				romanNumber := strings.Split(romanNumber, "")
-				smallSlice = append(smallSlice, RomanLetter(romanNumber[0]))
-				smallSlice = append(smallSlice, RomanLetter(romanNumber[1]))
-			} else {
-				smallSlice = append(smallSlice, RomanLetter(romanNumber))
+			for _, e := range(romanNumber){
+				smallSlice = append(smallSlice, RomanLetter(e))
 			}
 			diggitCopy -= value[i]
 		}
@@ -126,22 +114,22 @@ func task3c(s string) ([]RomanLetter, bool) {
 	var result []RomanLetter
 	splittedString := strings.Split(s, "")
 
-	for i := 0; i < len(splittedString); i++ {
-		switch splittedString[i] {
+	for _, e := range(splittedString) {
+		switch e {
 		case "I", "i":
-			result = append(result, RomanLetter("I"))
+			result = append(result, RomanLetter('I'))
 		case "V", "v":
-			result = append(result, RomanLetter("V"))
+			result = append(result, RomanLetter('V'))
 		case "X", "x":
-			result = append(result, RomanLetter("X"))
+			result = append(result, RomanLetter('X'))
 		case "L", "l":
-			result = append(result, RomanLetter("L"))
+			result = append(result, RomanLetter('L'))
 		case "C", "c":
-			result = append(result, RomanLetter("C"))
+			result = append(result, RomanLetter('C'))
 		case "D", "d":
-			result = append(result, RomanLetter("D"))
+			result = append(result, RomanLetter('D'))
 		case "M", "m":
-			result = append(result, RomanLetter("M"))
+			result = append(result, RomanLetter('M'))
 		default:
 			return nil, false
 		}
