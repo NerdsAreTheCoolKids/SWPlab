@@ -26,14 +26,14 @@ main:
   str r2, [r0]
 
   ldr r0, =IOSET1
-  ldr r1, = 0x00010000
+  ldr r1, = 0x00800000
   mov r4, #8
 
 loop:
   ldr r2, [r0]  
   orr r2, r2, r1
   str r2, [r0]
-  lsl r1, #1
+  lsr r1, #1
 
   ldr r3, =TIME
   bl delay

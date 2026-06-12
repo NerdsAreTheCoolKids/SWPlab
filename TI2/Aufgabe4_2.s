@@ -28,8 +28,8 @@ main:
   
   ldr r0, =IOSET1
   ldr r4, =IOCLR1
-  ldr r1, = 0x00010000
-  ldr r5, = 0x01000000 /*Obere Grenze für die Maske*/
+  ldr r5, = 0x00008000
+  ldr r1, = 0x00800000 /*Obere Grenze für die Maske*/
 
 walking_light:
 
@@ -45,10 +45,10 @@ walking_light:
   ldr r3, =TIME_OFF
   bl delay
 
-  lsl r1, #1
+  lsr r1, #1
   
   cmp r5, r1
-  ldreq r1, = 0x00010000
+  ldreq r1, = 0x00800000
 
   b walking_light
       

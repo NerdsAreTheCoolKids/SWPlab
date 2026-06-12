@@ -42,35 +42,29 @@
 
 main:
       /* Output definieren */
-      ldr r0, =(IOPIN1 + IODIR)
+      ldr r0, =IOPIN1
       ldr r1, =ALL_LED_bm
-      ldr r2, [r0]
+      ldr r2, [r0, #IODIR]
       orr r2, r1, r2
-      str r2, [r0]
+      str r2, [r0, #IODIR]
 
-      ldr r2, =(IOPIN1 + IOSET)
-      ldr r3, =(IOPIN1 + IOCLR)
       ldr r4, =IOPIN0
 loop:
 
       ldr r5, =BUTTON_0_bm
       ldr r6, =LED_0_bm
-      ldr r7, =LED_2_bm
       bl switch
 
       ldr r5, =BUTTON_1_bm
       ldr r6, =LED_1_bm
-      ldr r7, =LED_3_bm
       bl switch
 
       ldr r5, =BUTTON_2_bm
       ldr r6, =LED_4_bm
-      ldr r7, =LED_6_bm
       bl switch
 
       ldr r5, =BUTTON_3_bm
       ldr r6, =LED_5_bm
-      ldr r7, =LED_7_bm
       bl switch
       
       b loop 
@@ -79,31 +73,32 @@ loop:
 switch:
   push {lr}
   /* Check if button was pressed */
-  ldr r0, [r4]
-  ands r0, r5, r0
+  ldr r1, [r4]
+  ands r1, r5, r1
+  lsl r7, r6, #2
   bne no_switch
 
   /* Turn second LED on & first LED off*/
-  ldr r8, [r2]
+  ldr r8, [r0, #IOSET]
   orr r8, r8, r7
-  str r8, [r2]
+  str r8, [r0, #IOSET]
 
-  ldr r8, [r3]
+  ldr r8, [r0, #IOCLR]
   orr r8, r8, r6
-  str r8, [r3]
+  str r8, [r0, #IOCLR]
   
   pop {lr}
   bx lr
 
 no_switch:
   /* Turn first LED on & second LED off*/
-  ldr r8, [r2]
+  ldr r8, [r0, #IOSET]
   orr r8, r8, r6
-  str r8, [r2]
+  str r8, [r0, #IOSET]
 
-  ldr r8, [r3]
+  ldr r8, [r0, #IOCLR]
   orr r8, r8, r7
-  str r8, [r3]
+  str r8, [r0, #IOCLR]
 
   pop {lr}
   bx lr
